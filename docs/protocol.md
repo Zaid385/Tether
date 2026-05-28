@@ -30,6 +30,12 @@ All packets should include:
 - `presence_update`: Online/Offline/Away status.
 - `typing_indicator`: User is typing.
 
+### Contacts & History
+- `get_contacts`: Request sanitized list of all users.
+- `contacts_list`: Server response with user list.
+- `load_conversation`: Request message history with a specific user.
+- `conversation_history`: Server response with chronological message list.
+
 ### File Transfer
 - `file_init`: Request file transfer.
 - `file_chunk`: Binary chunk of a file.

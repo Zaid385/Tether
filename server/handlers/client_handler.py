@@ -22,43 +22,11 @@ class ClientHandler(threading.Thread):
                 if packet is None:
                     break
                 
-                self.handle_packet(packet)
+                self.controller.dispatcher.dispatch(self, packet)
         except Exception as e:
             self.controller.logger.error(f"Error handling client {self.address}: {e}")
         finally:
             self.cleanup()
-
-    def handle_packet(self, packet):
-        ptype = packet.type
-        
-        if ptype == ProtocolTypes.AUTH_LOGIN:
-            self.handle_login(packet)
-        elif ptype == ProtocolTypes.AUTH_REGISTER:
-            self.handle_register(packet)
-        else:
-            self.controller.logger.warning(f"Unhandled packet type: {ptype}")
-
-    def handle_login(self, packet):
-        username = packet.payload.get("username")
-        password = packet.payload.get("password")
-        
-        result = self.auth_service.login_user(username, password)
-        
-        if result["success"]:
-            self.username = username
-            self.controller.register_client(username, self.client_sock)
-        
-        response = Packet(ProtocolTypes.AUTH_RESPONSE, result)
-        send_packet(self.client_sock, response)
-
-    def handle_register(self, packet):
-        username = packet.payload.get("username")
-        password = packet.payload.get("password")
-        
-        result = self.auth_service.register_user(username, password)
-        
-        response = Packet(ProtocolTypes.AUTH_RESPONSE, result)
-        send_packet(self.client_sock, response)
 
     def cleanup(self):
         self.running = False

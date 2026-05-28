@@ -14,20 +14,28 @@ class MongoDB:
         return cls._instance
 
     def _connect(self):
-        uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+        uri = os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/")
         db_name = os.getenv("MONGODB_DB", "tether_db")
         
-        self.client = MongoClient(uri)
-        self.db = self.client[db_name]
-        
-        # Collections
-        self.users = self.db["users"]
-        self.messages = self.db["messages"]
-        self.groups = self.db["groups"]
-        self.notifications = self.db["notifications"]
-        self.logs = self.db["logs"]
-        
-        print(f"Connected to MongoDB: {db_name}")
+        try:
+            self.client = MongoClient(uri, serverSelectionTimeoutMS=2000)
+            self.db = self.client[db_name]
+            # Force a call to verify connection
+            self.client.admin.command('ping')
+            
+            # Collections
+            self.users = self.db["users"]
+            self.messages = self.db["messages"]
+            self.groups = self.db["groups"]
+            self.notifications = self.db["notifications"]
+            self.logs = self.db["logs"]
+            
+            print(f"✅ Connected to MongoDB: {db_name}")
+        except Exception as e:
+            print(f"❌ CRITICAL: Could not connect to MongoDB at {uri}")
+            print("Ensure that the MongoDB service is running.")
+            print("Run: 'sudo systemctl start mongodb' (on Arch Linux)")
+            raise e
 
     def close(self):
         self.client.close()

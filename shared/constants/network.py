@@ -18,14 +18,40 @@ class ProtocolTypes:
     
     # Presence
     PRESENCE_UPDATE = "presence_update"
-    TYPING_INDICATOR = "typing_indicator"
+    TYPING_START = "typing_start"
+    TYPING_STOP = "typing_stop"
     
-    # Files
-    FILE_INIT = "file_init"
-    FILE_CHUNK = "file_chunk"
-    FILE_COMPLETE = "file_complete"
+    # Receipts
+    MSG_DELIVERED = "msg_delivered"
+    MSG_READ = "msg_read"
+    RECEIPT_UPDATE = "receipt_update"
+    
+    # Contacts & History
+    GET_CONTACTS = "get_contacts"
+    CONTACTS_LIST = "contacts_list"
+    LOAD_CONVERSATION = "load_conversation"
+    CONVERSATION_HISTORY = "conversation_history"
     
     # Groups
-    GROUP_CREATE = "group_create"
-    GROUP_INVITE = "group_invite"
-    GROUP_LEAVE = "group_leave"
+    CREATE_GROUP = "create_group"
+    GROUP_CREATED = "group_created"
+    JOIN_GROUP = "join_group"
+    LEAVE_GROUP = "leave_group"
+    GROUP_MESSAGE = "group_message"
+    GROUP_HISTORY = "group_history"
+    GROUP_PRESENCE_UPDATE = "group_presence_update"
+    
+    # Notifications
+    NOTIFICATION = "notification"
+    
+    # Search
+    SEARCH_REQUEST = "search_request"
+    SEARCH_RESULTS = "search_results"
+    
+    # Files
+    FILE_TRANSFER_REQUEST = "file_transfer_request"
+    FILE_TRANSFER_ACCEPT = "file_transfer_accept"
+    FILE_TRANSFER_REJECT = "file_transfer_reject"
+    FILE_TRANSFER_CHUNK = "file_transfer_chunk"
+    FILE_TRANSFER_COMPLETE = "file_transfer_complete"
+    FILE_TRANSFER_PROGRESS = "file_transfer_progress"

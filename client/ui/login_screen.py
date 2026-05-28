@@ -1,13 +1,11 @@
-import sys
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                             QHBoxLayout, QLabel, QLineEdit, QPushButton, QFrame, 
-                             QSpacerItem, QSizePolicy)
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
 from PySide6.QtCore import Qt, Signal
-from client.themes.wise_theme import WiseTheme
+from client.ui.widgets.base import WiseButton, WiseInput, WiseCard
+from shared.constants.style import ColorTokens, TypographyTokens, SpacingTokens
 
 class LoginScreen(QWidget):
     login_requested = Signal(str, str)
-    register_requested = Signal(str, str)
+    go_to_register = Signal()
 
     def __init__(self):
         super().__init__()
@@ -17,69 +15,110 @@ class LoginScreen(QWidget):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignCenter)
         
-        # Card container
-        card = QFrame()
-        card.setObjectName("Card")
-        card.setFixedWidth(400)
-        card_layout = QVBoxLayout(card)
+        self.card = WiseCard()
+        self.card.setFixedWidth(400)
+        card_layout = QVBoxLayout(self.card)
         card_layout.setContentsMargins(40, 40, 40, 40)
-        card_layout.setSpacing(24)
+        card_layout.setSpacing(SpacingTokens.XL)
         
-        # Heading
         heading = QLabel("Tether")
-        heading.setObjectName("Heading")
         heading.setAlignment(Qt.AlignCenter)
+        heading.setStyleSheet(f"font-weight: {TypographyTokens.WEIGHT_BLACK}; font-size: {TypographyTokens.SIZE_DISPLAY_MD}px; color: {ColorTokens.INK};")
         card_layout.addWidget(heading)
         
-        subheading = QLabel("Welcome back. Sign in to continue.")
-        subheading.setObjectName("SubHeading")
+        subheading = QLabel("Sign in to your account")
         subheading.setAlignment(Qt.AlignCenter)
-        subheading.setWordWrap(True)
+        subheading.setStyleSheet(f"font-weight: {TypographyTokens.WEIGHT_SEMIBOLD}; font-size: {TypographyTokens.SIZE_BODY_MD}px; color: {ColorTokens.BODY};")
         card_layout.addWidget(subheading)
         
-        # Inputs
-        self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Username")
+        self.username_input = WiseInput(placeholder="Username")
         card_layout.addWidget(self.username_input)
         
-        self.password_input = QLineEdit()
-        self.password_input.setPlaceholderText("Password")
-        self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input = WiseInput(placeholder="Password", is_password=True)
         card_layout.addWidget(self.password_input)
         
-        # Buttons
-        self.login_btn = QPushButton("Log in")
+        self.login_btn = WiseButton("Log in")
         self.login_btn.clicked.connect(self._on_login)
         card_layout.addWidget(self.login_btn)
         
-        register_container = QHBoxLayout()
-        register_label = QLabel("Don't have an account?")
-        register_label.setStyleSheet(f"color: {WiseTheme.BODY};")
-        self.register_btn = QPushButton("Register")
-        self.register_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: transparent;
-                color: {WiseTheme.INK};
-                text-decoration: underline;
-                padding: 0px;
-                font-weight: 600;
-            }}
-            QPushButton:hover {{
-                color: {WiseTheme.PRIMARY};
-            }}
-        """)
-        self.register_btn.clicked.connect(self._on_register)
+        footer = QHBoxLayout()
+        label = QLabel("New to Tether?")
+        label.setStyleSheet(f"color: {ColorTokens.BODY}; font-size: {TypographyTokens.SIZE_BODY_SM}px;")
         
-        register_container.addStretch()
-        register_container.addWidget(register_label)
-        register_container.addWidget(self.register_btn)
-        register_container.addStretch()
-        card_layout.addLayout(register_container)
+        reg_btn = QPushButton("Create account")
+        reg_btn.setStyleSheet(f"background: transparent; color: {ColorTokens.INK}; text-decoration: underline; font-weight: 600; border: none;")
+        reg_btn.setCursor(Qt.PointingHandCursor)
+        reg_btn.clicked.connect(self.go_to_register.emit)
         
-        layout.addWidget(card)
+        footer.addStretch()
+        footer.addWidget(label)
+        footer.addWidget(reg_btn)
+        footer.addStretch()
+        card_layout.addLayout(footer)
+        
+        layout.addWidget(self.card)
 
     def _on_login(self):
+        self.login_btn.set_loading(True)
         self.login_requested.emit(self.username_input.text(), self.password_input.text())
 
+class RegisterScreen(QWidget):
+    register_requested = Signal(str, str, str) # username, password, phone
+    go_to_login = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.setup_ui()
+
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)
+        
+        self.card = WiseCard()
+        self.card.setFixedWidth(400)
+        card_layout = QVBoxLayout(self.card)
+        card_layout.setContentsMargins(40, 40, 40, 40)
+        card_layout.setSpacing(SpacingTokens.XL)
+        
+        heading = QLabel("Join Tether")
+        heading.setAlignment(Qt.AlignCenter)
+        heading.setStyleSheet(f"font-weight: {TypographyTokens.WEIGHT_BLACK}; font-size: {TypographyTokens.SIZE_DISPLAY_MD}px; color: {ColorTokens.INK};")
+        card_layout.addWidget(heading)
+        
+        self.username_input = WiseInput(placeholder="Username")
+        card_layout.addWidget(self.username_input)
+        
+        self.phone_input = WiseInput(placeholder="Phone Number (e.g. +1234567)")
+        card_layout.addWidget(self.phone_input)
+        
+        self.password_input = WiseInput(placeholder="Password", is_password=True)
+        card_layout.addWidget(self.password_input)
+        
+        self.register_btn = WiseButton("Register")
+        self.register_btn.clicked.connect(self._on_register)
+        card_layout.addWidget(self.register_btn)
+        
+        footer = QHBoxLayout()
+        label = QLabel("Already have an account?")
+        label.setStyleSheet(f"color: {ColorTokens.BODY}; font-size: {TypographyTokens.SIZE_BODY_SM}px;")
+        
+        login_btn = QPushButton("Log in")
+        login_btn.setStyleSheet(f"background: transparent; color: {ColorTokens.INK}; text-decoration: underline; font-weight: 600; border: none;")
+        login_btn.setCursor(Qt.PointingHandCursor)
+        login_btn.clicked.connect(self.go_to_login.emit)
+        
+        footer.addStretch()
+        footer.addWidget(label)
+        footer.addWidget(login_btn)
+        footer.addStretch()
+        card_layout.addLayout(footer)
+        
+        layout.addWidget(self.card)
+
     def _on_register(self):
-        self.register_requested.emit(self.username_input.text(), self.password_input.text())
+        self.register_btn.set_loading(True)
+        self.register_requested.emit(
+            self.username_input.text(), 
+            self.password_input.text(),
+            self.phone_input.text()
+        )
